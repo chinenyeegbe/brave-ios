@@ -82,12 +82,11 @@ class BrowserViewController: UIViewController {
     let tabManager: TabManager
 
     // These views wrap the urlbar and toolbar to provide background effects on them
-    var header: UIView!
+    var header: UIStackView!
     var footer: UIView!
     fileprivate var topTouchArea: UIButton!
     
     // These constraints allow to show/hide tabs bar
-    var headerHeightConstraint: Constraint?
     var webViewContainerTopOffset: Constraint?
     
     // Backdrop used for displaying greyed background for private tabs
@@ -326,12 +325,15 @@ class BrowserViewController: UIViewController {
         urlBar.translatesAutoresizingMaskIntoConstraints = false
         urlBar.delegate = self
         urlBar.tabToolbarDelegate = self
-        header = UIView(frame: CGRect.zero)
-        header.addSubview(urlBar)
+        header = UIStackView().then {
+            $0.axis = .vertical
+            $0.clipsToBounds = true
+        }
+        header.addArrangedSubview(urlBar)
         
         tabsBar = TabsBarViewController(tabManager: tabManager)
         tabsBar.delegate = self
-        header.addSubview(tabsBar.view)
+        header.addArrangedSubview(tabsBar.view)
         
         view.addSubview(header)
         
@@ -393,23 +395,23 @@ class BrowserViewController: UIViewController {
             scrollController.headerTopConstraint = make.top.equalTo(view.safeArea.top).constraint
             make.left.right.equalTo(self.view)
             
-            if let headerHeightConstraint = headerHeightConstraint {
-                headerHeightConstraint.update(offset: UX.UrlBar.height)
-            } else {
-                headerHeightConstraint = make.height.equalTo(UX.UrlBar.height).constraint
-            }
+//            if let headerHeightConstraint = headerHeightConstraint {
+//                headerHeightConstraint.update(offset: UX.UrlBar.height)
+//            } else {
+//                headerHeightConstraint = make.height.equalTo(UX.UrlBar.height).constraint
+//            }
         }
         
         urlBar.snp.makeConstraints { make in
-            make.leading.trailing.equalTo(header)
+//            make.leading.trailing.equalTo(header)
             make.height.equalTo(UIConstants.TopToolbarHeight)
-            make.top.equalTo(header.snp.top)
+//            make.top.equalTo(header.snp.top)
         }
         
         tabsBar.view.snp.makeConstraints { make in
-            make.leading.trailing.bottom.equalTo(header)
+//            make.leading.trailing.bottom.equalTo(header)
             make.height.equalTo(UX.TabsBar.height)
-            make.top.equalTo(urlBar.snp.bottom)
+//            make.top.equalTo(urlBar.snp.bottom)
         }
 
         webViewContainerBackdrop.snp.makeConstraints { make in
@@ -600,9 +602,9 @@ class BrowserViewController: UIViewController {
 
         webViewContainer.snp.remakeConstraints { make in
             make.left.right.equalTo(self.view)
-            
-            let tabsBarOffset = tabsBar.view.isHidden ? UX.TabsBar.height : 0
-            webViewContainerTopOffset = make.top.equalTo(readerModeBar?.snp.bottom ?? self.header.snp.bottom).inset(tabsBarOffset).constraint
+//
+//            let tabsBarOffset = tabsBar.view.isHidden ? UX.TabsBar.height : 0
+            webViewContainerTopOffset = make.top.equalTo(readerModeBar?.snp.bottom ?? self.header.snp.bottom).constraint
 
             let findInPageHeight = (findInPageBar == nil) ? 0 : UIConstants.ToolbarHeight
             if let toolbar = self.toolbar {
@@ -629,8 +631,7 @@ class BrowserViewController: UIViewController {
         // Remake constraints even if we're already showing the home controller.
         // The home controller may change sizes if we tap the URL bar while on about:home.
         favoritesViewController?.view.snp.remakeConstraints { make in
-            let tabsBarOffset = tabsBar.view.isHidden ? UX.TabsBar.height : 0
-            webViewContainerTopOffset = make.top.equalTo(readerModeBar?.snp.bottom ?? self.header.snp.bottom).inset(tabsBarOffset).constraint
+            webViewContainerTopOffset = make.top.equalTo(readerModeBar?.snp.bottom ?? self.header.snp.bottom).constraint
             
             make.left.right.equalTo(self.view)
             if self.homePanelIsInline {
@@ -780,9 +781,7 @@ class BrowserViewController: UIViewController {
         if isShowing != shouldShow {
             UIView.animate(withDuration: 0.1) {
                 self.tabsBar.view.isHidden = !shouldShow
-                self.headerHeightConstraint?.update(offset: UX.UrlBar.height)
-                self.webViewContainerTopOffset?.update(inset: shouldShow ? 0 : UX.TabsBar.height)
-                self.view.layoutIfNeeded()
+//                self.view.layoutIfNeeded()
             }
         }
     }
